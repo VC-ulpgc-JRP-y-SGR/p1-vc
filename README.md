@@ -1,134 +1,87 @@
-## Práctica 1. Primeros pasos con OpenCV
+## Práctica 1.
 
-### Contenidos
+# TAREA 1
+### Crea una imagen, p.e. 800x800, con la textura del tablero de ajedrez
 
-[Instalación](#11-instalando-el-entorno-de-desarrollo)  
-[Anaconda](#111-comandos-basicos-de-anaconda)  
-[Spec-list](#112-un-environment-para-varias-practicas)  
-[Mi carpeta](#113-el-environment-en-otra-carpeta)  
-[Aspectos cubiertos](#12-aspectos-cubiertos)  
+    Para la realización de esta tarea creimos conveniente encapsular toda la lógica dentro de una clase llamada Chessboard. Esta clase nos permite Crear cualquier tipo de tablero estilo ajedrez con la cantidad de cuadros por fila que queramos.
 
-### 1.1. Instalando el entorno de desarrollo  
+    Para utilizarla simplemente hay que crear la clase especificando en el parámetro n_rows el tipo de tablero que queremos, en este caso de 8 casillas como uno convencional, y finalmente usar el método to_img() para devolver un array de numpy y finalmente mostrarlo.
 
-Si bien tienen libertad para seleccionar el entorno de desarrollo, mi opción escogida para mostrar
-los distintos ejemplos en el laboratorio con Python desde Windows ha sido [Anaconda](https://www.anaconda.com). Anaconda me permite crear distintos *environments* cada uno con sus paquetes particulares y versiones específicas instaladas, pudiendo desde [Visual Studio Code](https://code.visualstudio.com) ejecutar un cuaderno concreto escogiendo el *environment* que me interese. Para las personas que prefieran no utilizar Windows, comentarles que mi experiencia en Linux con [Miniconda](https://docs.conda.io/projects/miniconda/en/latest/miniconda-install.html) ha sido similar.
+```python3
+chessboard = Chessboard(n_rows=8)
+image = chessboard.to_img()
 
-Los equipos del laboratorio ya cuentan con Anaconda y VS Code instalados, si bien no completamente configurados para ejecutar el cuaderno de esta práctica. Conocida esta circunstancia, para poder ejecutar un primer cuaderno proporcionado tras contar en el equipo con la instalación de Anaconda y VS Code, resumo los pasos que tuve que realizar:
-
-- Lanzar VS Code (en el PC del laboratorio disponible en el escritorio)
-
-- Instalar la extensión de Python en VS Code. Desde el [enlace](https://code.visualstudio.com/docs/languages/python) con VS Code abierto me lleva al [enlace](https://marketplace.visualstudio.com/items?itemName=ms-python.python) en el *Marketplace*
-
-- Lanzar *Anaconda Prompt*
-
-- Crear el *environment* con la configuración que nos interese. Para crear uno que ejecute el cuaderno de esta práctica, sin darle muchas vueltas con una versión reciente de Python, este mes de septiembre he lanzado lo siguiente:
-
-```
-conda create --name VC_P1 python=3.11.5
+plt.imshow(image, cmap='gray')
+plt.show()
 ```
 
-Me lo crea con la versión de Python escogida. Sustituye *VC_P1* por el nombre que decidas. Tras crearlo, activo e instalo un par de paquetes adicionales
+    La implementación de esta clase cuenta con un método interno llamado paint_square que dado una posición y un ancho del cuadrado nos lo pinta encima de nuestro array con el color que nosotros queramos (En este caso será o bien negro, o bien blanco).
 
 ```
-conda activate VC_P1
-pip install opencv-python
-pip install matplotlib
+def paint_quare(self, image, point, width, color):
+    image[point[1]:point[1] + width,point[0]:point[0]+width] = color
 ```
 
-NOTA: Para aquellas personas que quieren trabajar bajo Windows, tienen disponible en la sección 1.1.2, la descripción de creación de un *environment* con más paquetes que tendrá vida útil para varias prácticas.
-
-Una vez que ya está el *environment* creado:
-
-- Tenía en ejecución tanto VS Code como la terminal de *Anaconda Prompt*
-
-- Abro el cuaderno de la práctica en VS Code
-
-- En VS Code se hace necesario lanzar su *Command Palette* con la combinación *CTRL+SHIT+Palette*
-
-- Es el momento de seleccionar el *environment* recientemente creado, tecleando *Python: Seleccionar intérprete*,  seleccionando el que nos interese.
-
-- En algunas máquinas al intentar el comando anterior, me ha aparecido un error con algo como *interpreter not found*. Lo he resuelto seleccionando en la parte inferior izquierda el modo *Trust* en lugar de *Restricted*
-
-- Una vez llegados a este punto, la primera ejecución de un cuaderno probablemente produzca un error, ya que es necesario instalar elementos necesarios para el uso de los cuadernos instalando *ipykernel*. En mi caso, VS Code ha dado error, y me propuso el siguiente comando (sugerido por VS Code) desde línea de comando. Mi experiencia desde *Anaconda Prompt* ha sido positiva al lanzarlo desde el *environment* original, es decir no desde el environment *VC_P1* sino el *base*.
-
+    Por último el método to_img para pintar el tablero a través de dos for loops que van recorriendo todo el array de forma vertical dejando los cuadrados pintados en los sitios correspondientes. Indicar que el recorrido va dando saltos del tamaño de uno de los cuadrados para de esta forma por cada cuadrado negro dibujado, se dejara un espacio en blanco de mismo tamaño. La variable fase se utiliza para desplazar el dibujo hacia debajo y que no nos queden rayas negras y blancas sino el tablero de ajedrez.
+    
 ```
-conda install -n ENV_NAME ipykernel --update-deps --force-reinstall
-```
-
-- Llegado a este punto, ya me fue posible ejecutar el cuaderno de esta primera práctica. Cruzo los dedos, y veremos las variantes con las que nos encontramos.
-
-#### 1.1.1. Comandos básicos de Anaconda
-
-En el proceso de creación del *environment* pueden surgir errores, quizás necesitemos eliminarlo, crearlo de  nuevo, listar los existentes. Un muy breve resumen de comandos frecuentes:
-
-```
-conda info --envs # Lista environments existentes
-conda remove --name ENV_NAME --all # Elimina el environment ENV_NAME
-conda list --explicit > spec-file.txt   # genera un txt con los elementos presentes en el envopronmente activado
+    def to_img(self):
+        img = np.zeros((self.size, self.size,1), dtype = np.uint8)
+        paint_phase = 0
+        
+        for x in range(0, self.size, (self.size//self.n_rows)):
+            for y in range(paint_phase, self.size, (self.size//self.n_rows) * 2):
+                self.paint_quare(img, (y, x), self._square_size, 255)
+            paint_phase = 100 if paint_phase == 0 else 0
+        return img
 ```
 
 
+# TAREA 2
+### Crear una imagen estilo Mondrian
 
-#### 1.1.2. Un environment para varias prácticas
+    Para hacer un dibujo al estilo Mondrian, como estos se basan sobre todo en dibujar rectángulos, se ha intentado generalizar la creación de estos por medio de una clase que los represente, la cual hemos llamado Rectangle.
+    
+    Esta clase tiene como atributos el color, la altura y anchura del rectángulo, así como un valor 'offset' que nos sirve para determinar el tamaño en píxeles del padding del rectángulo.
+    
+    Para poder dibujar un objeto de clase Rectangle en una imagen, se hace uso de su método *apply()*, al cual se le pasa como argumentos la imagen donde se quiere dibujar y el punto de la imagen donde comienza el rectángulo. Con esto, con simplemente trabajar con las medidas del rectángulo y el punto inicial, podemos establecer los píxeles de la imagen donde se va a tener que pintar del color del rectángulo.
 
-Reproduzco la instalación que está en funcionamiento en mi equipo portátil en su partición bajo Windows (no funcionará con otros sistemas operativos). Como verás, hace uso de la versión Python 3.7.3, si bien incluye
-paquetes no necesarios en las primeras prácticas. Sugiero sustituir *ENV_NAME* por un nombre de tu elección. En el caso de trabajar en otro sistema operativo, evitar incluir *spec-list.txt* e ir añadiendo los paquetes que vayan siendo necesarios.
+```python3
+    class Rectangle:
+        def __init__(self, width, height, rgb, offset = 0):
+            self.width = width
+            self.height = height
+            self.rgb = rgb
+            self.offset = offset
+
+        def apply(self, image, point):
+            image[point[1]+self.offset:point[1] + self.height-self.offset , point[0]+self.offset:point[0]+self.width-self.offset] = self.rgb
+```
+    Para hacer uso de esto y crear un dibujo estilo Mondrian, se ha creado una imagen con todos sus píxeles a color negro y se han creado una serie de rectángulos con los valores deseados de anchura, altura, color y padding y se recorren uno a uno para que se apliquen en la imagen final a través del método *apply()*.
+
+# TAREA 3
+## Crea una imagen estilo Mondrian con OPENCV
+
+SARA
+
+# TAREA 4
+## Modifica de alguna forma los valores de un plano de la imagen
+
+Para esta tarea lo que hemos echo es separar los canales rgb de la imagen pero manteniendo el formato rgb es decir una tupla con 3 valores (Aunque cabe destacar que en openCV no se utiliza el rgb sino el bgr)
+
+Para ello lo primero es multiplicar los pixeles de la imagen por 3 matrices [1, 0, 0], [0, 1, 0], [0, 0, 1] de esta forma nos iremos quedando con cada uno de los canales
 
 ```
-conda create --name ENV_NAME python=3.7.3 --file spec-list.txt
-```
-
-El comando anterior puede requerir unos minutos. A continuación se activa *environment*
 
 ```
-conda activate ENV_NAME
-```
 
-Y se instala algún paquete adicional necesario
+# TAREA 5
+### Pintar círculos en las posiciones del píxel más claro y oscuro de la imagen  ¿Si quisieras hacerlo sobre la zona 8x8 más clara/oscura?
 
-```
-pip install imutils sklearn matplotlib
-```
+PEPE
 
 
-#### 1.1.3. El environment en otra carpeta
+# TAREA 6
+### Haz tu propuesta pop art
 
-
-Tener presente que en el laboratorio, si trabajas con el ordenador del aula, el rearranque borra directorios locales, por lo que los *environments* creados localmente, desaparecen. Puede interesar por ello crearlo en una carpeta local que no se limpie, como */pub/tmp*, en un disco externo o pen propio con *--prefix flag*
-Para crear el *environment* de la subsección previa en una carpeta concrete en el PC, he procedido con los siguientes comandos:
-
-
-```
-conda create --prefix c:/pub/tmp/JPA/FACES --file spec-list.txt python=3.7.3
-conda activate c:/pub/tmp/JPA/FACES
-pip install imutils
-pip install scikit-learn
-```
-
-
-Si algo hubiera ido mal y quisieras eliminar el *environment* para empezar de nuevo, recordar los comandos del apartado 1.1.1
-
-
-### 1.2. Aspectos cubiertos y entrega
-
-El objetivo de esta práctica en primer término es poder ejecutar el cuaderno proporcionado en nuestro propio equipo o el del laboratorio. Este primer cuaderno (VC_P1.ipynb) debe servir para comprender de forma aplicada la representación de imágenes de grises y color, su modificación, visualización y tratamiento básico. Al finalizar la práctica, debes ser capaz de crear una imagen de un determinado tamaño,
-acceder a los valores asociados a un determinado píxel, modificar dichos valores, dibujar primitivas gráficas básicas sobre una imagen, abrir una imagen de disco, así como acceder a los fotogramas de un vídeo o captura de cámara. Para todo ello, se proponen varias tareas (espero no dejarme ninguna atrás aquí):
-
-- Crear una imagen con la textura de un tablero de ajedrez
-- Crear una imagen estilo Mondrian como por ejemplo
-
-![Mondrian](https://images.squarespace-cdn.com/content/v1/5f638d3adfa9c677cced1579/1602089211975-ONZ6AALHOOPRVT7Z5ALL/Composición+en+rojo%2C+amarillo+y+azul.jpg?format=2500w)  
-*Piet Mondrian, "Composición con rojo, amarillo y azul" (1930).*
-
-- Hacer uso de las funciones de dibujo de OpenCV
-- Modificar un plano de la imagen
-- Destacar tanto el píxel con el color más claro como con el color más oscuro de una imagen
-- Hacer una propuesta pop art con la entrada de la cámara web o vídeo
-
-La entrega del cuaderno o cuadernos con la resolución de tareas propuestas e imágenes resultantes se realizará por grupos a través del campus virtual por medio de un enlace github, teniendo como límite el comienzo de la siguiente sesión práctica. Durante la siguiente sesión práctica cada grupo, en orden aleatorio, presentará y defenderá el resultado al profesor de la asignatura. De forma genérica, para todas las prácticas, el enlace github debe incluir un archivo README describiendo el trabajo realizado, incluyendo referencia a todas las fuentes que hayan sido utilizadas de alguna forma en el desarrollo de la práctica, además de indicar si la ejecución del cuaderno requiere alguna instalación adicional. Además incluirán uno o varios cuadernos comentados con la resolución de la tarea o tareas solicitadas .
-
-
-
-
-***
-Bajo licencia de Creative Commons Reconocimiento - No Comercial 4.0 Internacional
+SARA
