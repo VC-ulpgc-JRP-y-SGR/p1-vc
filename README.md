@@ -71,15 +71,117 @@ Para esta tarea lo que hemos echo es separar los canales rgb de la imagen pero m
 
 Para ello lo primero es multiplicar los pixeles de la imagen por 3 matrices [1, 0, 0], [0, 1, 0], [0, 0, 1] de esta forma nos iremos quedando con cada uno de los canales
 
-```
+A la primera imagen le aplicamos un filtro negativo restando por 1 toda la imagen entera. A la segunda la multiplicamos por 2 para aumentar el brillo pero asegurandonos que no haya ningún pixel que pase de 255 usango la función np.clip. Por último al tercero le bajamos el brillo dividiendo todos sus pixeles entre 2.
 
 ```
+    # SEPARO LOS CANALES MULTIPLICANDO POR EL ARRAY [1, 0, 0] PARA QUE MANTENGA EL FORMATO BGR
+    # LO CONVERTIMOS EN NEGATIVO RESTANDO 1
+    r = 1 - (frame[:, :] *  [1, 0, 0])
+
+    #AUMENTO EL BRILLO DE LA IMAGEN MULTIPLICANDO POR UN ESCALAR
+    g = (frame[:, :] * [0, 1, 0]) * 2
+
+    #PASA QUE MUCHAS VECES ESA MULTIPLICACION SE SALE POR ENCIMA DE 255 POR LO TANTO LA IMAGEN SE DISTORSIONA
+    #A SI QUE NOS ASEGURAMOS QUE EL MINIMO SEA 0 Y EL MAXIMO SEA 255 DE LOS DIFERENTES ELEMENTOS
+    g = np.clip(g, 0, 255)
+
+    #VAMOS A OSCURECER LA IMAGEN DIVIDIENDOLA ENTRE UN NUMERO
+    # EN ESTE CASO NO HAY PELIGRO DE QUE EL VALOR BAJE DE 0 PUES LA FUNCION F(X) = X/n tiene una asintota horizontal en 0
+    b = (frame[:, :] * [0, 0, 1])/2
+```
+
+Por ultimo creamos un stack con las tres imagenes formadas y lo mostramos
+
+```
+    final = np.hstack((r, g, b))
+    final = final.astype(np.uint8)
+
+    w, h, c = frame.shape
+
+    cv2.imshow("CAMERA", cv2.resize(final, (int(w*3),int(h/3)),cv2.INTER_NEAREST))
+```
+
 
 # TAREA 5
 ### Pintar círculos en las posiciones del píxel más claro y oscuro de la imagen  ¿Si quisieras hacerlo sobre la zona 8x8 más clara/oscura?
 
-PEPE
+Comencemos por la primera tarea. Para conocer el pixel mas claro y el mas oscuro hemos probado dos métodos: primero recorriendo la imagen matriz con dos bucles for y segundo usando funciones de numpy para poder averiguar el pixel.
 
+El primer método es sencillo recorre toda la matriz guardando en dos variables el punto con máximo brillo y el brillo en ese punto. Si algún pixel supera ese brillo se actualiza el brillo máximo y el punto. Así hasta que termina el recorrido. Lo mismo para la función del pixel mas oscuro pero al revés por lo tanto no considero que haya que explicarlo. Este método daba mucho lag debido al tiempo que tarda en recorrer toda la matriz por iteración
+
+```
+def find_brightest_pixel(image):
+    # Initialize variables to keep track of the brightest pixel and its brightness
+    brightest_pixel = None
+    max_brightness = -1  # Initialize to a low value
+
+    # Iterate through all the pixels in the image
+    for y in range(image.shape[0]):
+        for x in range(image.shape[1]):
+            # Calculate the brightness of the current pixel
+            pixel_brightness = np.mean(image[y, x])
+
+            # Check if this pixel is brighter than the previous brightest
+            if pixel_brightness > max_brightness:
+                max_brightness = pixel_brightness
+                brightest_pixel = (x, y)  # Store the coordinates of the brightest pixel
+
+    return brightest_pixel, max_brightness
+```
+
+El segundo método usa numpy y es bastante más compacto. Para esto primero se usa la función aveerage en el axis2 de esta forma convertimos todos los pixeles rgb a un escalar que es el promedio de los 3 valores.
+
+Después buscamos con argmax el indice del máximo de los valores de esta matriz este método duelve el indice como si fuera un array de 1d por lo tanto tendremos que usar unravel_index para convertirlo en un punto de dos dimensiones sobre nuestra imagen.
+
+```
+    pmas_claro = np.unravel_index(np.argmax(np.average(image, axis=2)), image.shape[:2])
+```
+
+Por último pintamos este punto y ya estaría. Para la versión oscura basta con sustituir argmax por argmin por lo tanto veo innecesario exlicarlo.
+
+```
+    cv2.circle(image, (pmas_claro[1], pmas_claro[0]), 20, (255, 0, 0), -1)
+    cv2.circle(image, (pmas_oscuro[1], pmas_oscuro[0]), 20, (0, 0, 255), -1)
+```
+
+La segunda tarea sería buscar la región de 8x8 con mayor brillo y menor brillo. Para esto hemos igual que antes desarrollado dos formas, una lenta recorriendo con dos bucles toda la matriz y otra rápida usando numpy y una de las propiedades de la operación de convolución.
+
+La primera forma hace exactamente lo mismo que en la de un pixel lo que va calculando el brillo por región envez de puntualmente y apuntando el pixel de arriba a la izquierda de la región procesada. A su vez al recorrer el bucle hay que restar 7 a las dimensiones de la imagen para no pasarnos de indice. De nuevo este método es muy lento y producía cierto lag.
+
+```
+def find_darkest_8x8_region(image):
+    # Initialize variables to keep track of the darkest region and its brightness
+    darkest_region = None
+    min_region_brightness = 256  # Initialize to a high value (assuming 8-bit grayscale)
+    
+    # Iterate through all possible 8x8 regions in the image
+    for y in range(image.shape[0] - 7):
+        for x in range(image.shape[1] - 7):
+            # Extract the 8x8 region from the image
+            region = image[y:y+8, x:x+8]
+            
+            # Calculate the average brightness of the region
+            region_brightness = np.mean(region)
+            
+            # Check if this region is darker than the previous darkest
+            if region_brightness < min_region_brightness:
+                min_region_brightness = region_brightness
+                darkest_region = (x, y)  # Store the top-left coordinates of the darkest region
+    
+    return darkest_region, min_region_brightness
+```
+
+Respecto el método con numpy es muy parecido al anterior. Primero hacemos un average para sacar el brillo por pixel. Después aplicamos una convolución con una matriz de todo 1nos de 8x8 de esta forma en cada pixel tendremos el brillo de cada región de 8x8 y por ultimo usamos argmax y unravel index al igual que antes para quedarnos el punto de esa región de 8x8.
+
+
+```
+    means_matrix = np.average(image, axis=2)
+
+    convolve = cv2.filter2D(means_matrix, -1, np.ones((8, 8)))
+
+    point = np.unravel_index(np.argmax(convolve), convolve.shape[:2])
+    point_min = np.unravel_index(np.argmin(convolve), convolve.shape[:2])
+```
 
 # TAREA 6
 ### Haz tu propuesta pop art
