@@ -198,7 +198,9 @@ A continuación, utilizamos argmax y unravel_index, como mencionamos anteriormen
 
 Como propuestas de pop art hemos realizado 4 filtros de imagen diferentes, haciendo uso de los siguientes métodos:
 
-Método **convolution2D()**: este método toma una imagen y un kernel como entrada y realiza una convolución bidimensional en la imagen utilizando el kernel especificado. Luego, aplica una umbralización para obtener áreas blancas y negras en la imagen, delimitando la cantidad de colores transicionales y generando más contraste y, finalmente, aplica un mapa de color propio de la librería *cv2* que se pasa como entrada para obtener una imagen coloreada. Dependiendo del kernel que se use se puede conseguir que se filtren los bordes de la imagen ya sea de forma vertical u horizontal.
+1. *Método **convolution2D()**:* 
+
+Este método toma una imagen y un kernel como entrada y realiza una convolución bidimensional en la imagen utilizando el kernel especificado. Luego, aplica una umbralización para obtener áreas blancas y negras en la imagen, delimitando la cantidad de colores transicionales y generando más contraste y, finalmente, aplica un mapa de color propio de la librería *cv2* que se pasa como entrada para obtener una imagen coloreada. Dependiendo del kernel que se use se puede conseguir que se filtren los bordes de la imagen ya sea de forma vertical u horizontal.
 
 ```python
     def convolution2D(image, kernel = np.array([[1,1,1], [0,0,0], [1,1,1]]), color_scheme=cv2.COLORMAP_JET):
@@ -208,7 +210,9 @@ Método **convolution2D()**: este método toma una imagen y un kernel como entra
     return cv2.applyColorMap(thresholded_result, color_scheme)
 ```
 
-Método **pixelate_numpy_array()**: toma una imagen de entrada y un tamaño de píxel como entrada. Divide la imagen en bloques cuadrados del tamaño de píxel especificado y promedia los colores en cada bloque, creando un efecto de pixelado.
+2. *Método **pixelate_numpy_array()**:* 
+
+Este toma una imagen de entrada y un tamaño de píxel como entrada. Divide la imagen en bloques cuadrados del tamaño de píxel especificado y promedia los colores en cada bloque, creando un efecto de pixelado.
 
 ```python
     def pixelate_numpy_array(input_image, pixel_size):
