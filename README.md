@@ -3,9 +3,9 @@
 # TAREA 1
 ### Crea una imagen, p.e. 800x800, con la textura del tablero de ajedrez
 
-Para la realización de esta tarea creimos conveniente encapsular toda la lógica dentro de una clase llamada Chessboard. Esta clase nos permite Crear cualquier tipo de tablero estilo ajedrez con la cantidad de cuadros por fila que queramos.
+Para llevar a cabo esta tarea, consideramos conveniente encapsular toda la lógica dentro de una clase llamada Chessboard. Esta clase nos permite crear tableros de estilo ajedrez de cualquier tamaño, especificando la cantidad de cuadros por fila que deseamos.
 
-Para utilizarla simplemente hay que crear la clase especificando en el parámetro n_rows el tipo de tablero que queremos, en este caso de 8 casillas como uno convencional, y finalmente usar el método to_img() para devolver un array de numpy y finalmente mostrarlo.
+Para utilizarla, simplemente debemos crear una instancia de la clase, indicando en el parámetro n_rows el tamaño del tablero que queremos; por ejemplo, 8 casillas para uno convencional. Luego, podemos utilizar el método to_img() para obtener un arreglo de numpy y mostrar el tablero.
 
 ```python
 chessboard = Chessboard(n_rows=8)
@@ -15,14 +15,14 @@ plt.imshow(image, cmap='gray')
 plt.show()
 ```
 
-La implementación de esta clase cuenta con un método interno llamado paint_square que dado una posición y un ancho del cuadrado nos lo pinta encima de nuestro array con el color que nosotros queramos (En este caso será o bien negro, o bien blanco).
+La implementación de esta clase incluye un método interno llamado paint_square que permite dibujar un cuadrado en una posición específica del tablero con un ancho determinado y el color que elijamos. En este caso, los colores disponibles son negro o blanco.
 
 ```python
 def paint_quare(self, image, point, width, color):
     image[point[1]:point[1] + width,point[0]:point[0]+width] = color
 ```
 
-Por último el método to_img para pintar el tablero a través de dos for loops que van recorriendo todo el array de forma vertical dejando los cuadrados pintados en los sitios correspondientes. Indicar que el recorrido va dando saltos del tamaño de uno de los cuadrados para de esta forma por cada cuadrado negro dibujado, se dejara un espacio en blanco de mismo tamaño. La variable fase se utiliza para desplazar el dibujo hacia debajo y que no nos queden rayas negras y blancas sino el tablero de ajedrez.
+Finalmente, el método to_img se encarga de dibujar el tablero mediante dos bucles for que recorren todo el arreglo verticalmente, colocando los cuadrados en las posiciones correspondientes. Es importante destacar que en cada iteración, los bucles avanzan en incrementos del tamaño de uno de los cuadrados. De esta manera, por cada cuadrado negro dibujado, se deja un espacio en blanco del mismo tamaño. La variable fase se utiliza para ajustar el desplazamiento del dibujo hacia abajo, evitando que se formen filas alternas de cuadrados negros y blancos y logrando así el patrón de un tablero de ajedrez.
     
 ```python
     def to_img(self):
