@@ -63,7 +63,15 @@ Para hacer uso de esto y crear un dibujo estilo Mondrian, se ha creado una image
 # TAREA 3
 ## Crea una imagen estilo Mondrian con OPENCV
 
-SARA
+Se ha escogido resolver la tarea de Mondrian haciendo uso de las funciones de dibujo de OpenCV. 
+
+La librería *cv2* de OpenCV cuenta con una función llamada *rectangle()* la cual se usa para dibujar rectángulos en una imagen pasando como argumentos la imagen, el punto inicial del rectángulo superior izquierdo, el punto final inferior derecho, el color en formato RGB con el que se va a colorear y su grosor. Si el grosor tiene como valor '-1', se rellenará del color escogido por dentro.
+
+```python
+    cv2.rectangle(image, (x0, y1), (x1, y0), (r, g, b), -1)
+```
+
+Siendo que los dibujos al estilo Mondrian se basan principalmente en el dibujo de rectángulos, para resolver el ejercicio solo habría que hacer uso de la función por cada rectángulo que queramos dibujar, partiendo de una base de la imagen en color negro como fondo.
 
 # TAREA 4
 ## Modifica de alguna forma los valores de un plano de la imagen
@@ -101,7 +109,6 @@ Por ultimo creamos un stack con las tres imagenes formadas y las mostramos.
 
     cv2.imshow("CAMERA", cv2.resize(final, (int(w*3),int(h/3)),cv2.INTER_NEAREST))
 ```
-
 
 # TAREA 5
 ### Pintar círculos en las posiciones del píxel más claro y oscuro de la imagen  ¿Si quisieras hacerlo sobre la zona 8x8 más clara/oscura?
@@ -189,4 +196,3 @@ A continuación, utilizamos argmax y unravel_index, como mencionamos anteriormen
 # TAREA 6
 ### Haz tu propuesta pop art
 
-SARA
