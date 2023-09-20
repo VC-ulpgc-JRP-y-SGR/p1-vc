@@ -196,3 +196,55 @@ A continuación, utilizamos argmax y unravel_index, como mencionamos anteriormen
 # TAREA 6
 ### Haz tu propuesta pop art
 
+Como propuestas de pop art hemos realizado 4 filtros de imagen diferentes, haciendo uso de los siguientes métodos:
+
+Método **convolution2D()**: este método toma una imagen y un kernel como entrada y realiza una convolución bidimensional en la imagen utilizando el kernel especificado. Luego, aplica una umbralización para obtener áreas blancas y negras en la imagen, delimitando la cantidad de colores transicionales y generando más contraste y, finalmente, aplica un mapa de color propio de la librería *cv2* que se pasa como entrada para obtener una imagen coloreada. Dependiendo del kernel que se use se puede conseguir que se filtren los bordes de la imagen ya sea de forma vertical u horizontal.
+
+```python
+    def convolution2D(image, kernel = np.array([[1,1,1], [0,0,0], [1,1,1]]), color_scheme=cv2.COLORMAP_JET):
+    convolution_result = cv2.filter2D(image, -1, kernel)
+    thresholded_result = np.where(convolution_result > 240, 255, 0)
+    thresholded_result = thresholded_result.astype(np.uint8)
+    return cv2.applyColorMap(thresholded_result, color_scheme)
+```
+
+Método **pixelate_numpy_array()**: toma una imagen de entrada y un tamaño de píxel como entrada. Divide la imagen en bloques cuadrados del tamaño de píxel especificado y promedia los colores en cada bloque, creando un efecto de pixelado.
+
+```python
+    def pixelate_numpy_array(input_image, pixel_size):
+    height, width, channels = input_image.shape
+    for x in range(0, height, pixel_size//2):
+        for y in range(0, width, pixel_size//2):
+            color = input_image[x][y]
+            input_image[x:x+pixel_size//2,y:y+pixel_size//2] = color
+    return input_image
+```
+
+Con estos dos métodos tenemos margen suficiente para jugar con las imágenes que se obtienen de la instancia de la cámara de vídeo del dispositivo que se esté usando. 
+
+Además, se generan dos matrices de ruido (noise y noise2) utilizando la función pixelate_numpy_array y usando numpy para generar píxeles grises random. Estas matrices se sumarán o restarán más tarde de las imágenes que filtremos.
+
+```python
+    noise = pixelate_numpy_array(np.random.randint(50, size=(image.shape[0],image.shape[1], 1), dtype=np.uint8), 10)
+    noise2 = pixelate_numpy_array(np.random.randint(10, size=(image.shape[0],image.shape[1], 1), dtype=np.uint8), 10)
+```
+
+A continuación, la imagen original que se captura por cámara es copiada cuatro veces para aplicar los métodos explicados anteriormetne, así como sumas y restas entre sí y con las matrices de ruido para generar diversos efectos. Por ejemplo, poner en negativo el resultado de una convolución 2D con un efecto de ruido añadido (im2):
+
+```python
+    im1 = image.copy()
+    im1 = pixelate_numpy_array(convolution2D(im1, kernel = np.array([[1,0,1], [1,0,1], [1,0,1]]), color_scheme = cv2.COLORMAP_PLASMA), 20) 
+
+    im2 = image.copy()
+    im2 = 1 - convolution2D(im2, kernel = np.array([[1,0,1], [1,0,1], [1,0,1]]), color_scheme=cv2.COLORMAP_BONE)
+    
+    im3 = image.copy()
+    im3 = pixelate_numpy_array(convolution2D(im3, color_scheme=cv2.COLORMAP_WINTER), 20)
+    
+    im4 = image.copy()
+    im4 = convolution2D(im4, kernel = np.array([[1,0,1], [1,0,1], [1,0,1]]), color_scheme=cv2.COLORMAP_BONE)
+
+    result = np.vstack((np.hstack((noise + im2, im3)), np.hstack((1 - (im1 + im3), np.clip(( im4 - noise2 ), 0, 255)))))
+
+    cv2.imshow("POP ART", result)
+```
