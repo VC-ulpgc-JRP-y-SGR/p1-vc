@@ -7,7 +7,7 @@
 
     Para utilizarla simplemente hay que crear la clase especificando en el parámetro n_rows el tipo de tablero que queremos, en este caso de 8 casillas como uno convencional, y finalmente usar el método to_img() para devolver un array de numpy y finalmente mostrarlo.
 
-```python3
+```python
 chessboard = Chessboard(n_rows=8)
 image = chessboard.to_img()
 
@@ -17,14 +17,14 @@ plt.show()
 
     La implementación de esta clase cuenta con un método interno llamado paint_square que dado una posición y un ancho del cuadrado nos lo pinta encima de nuestro array con el color que nosotros queramos (En este caso será o bien negro, o bien blanco).
 
-```
+```python
 def paint_quare(self, image, point, width, color):
     image[point[1]:point[1] + width,point[0]:point[0]+width] = color
 ```
 
     Por último el método to_img para pintar el tablero a través de dos for loops que van recorriendo todo el array de forma vertical dejando los cuadrados pintados en los sitios correspondientes. Indicar que el recorrido va dando saltos del tamaño de uno de los cuadrados para de esta forma por cada cuadrado negro dibujado, se dejara un espacio en blanco de mismo tamaño. La variable fase se utiliza para desplazar el dibujo hacia debajo y que no nos queden rayas negras y blancas sino el tablero de ajedrez.
     
-```
+```python
     def to_img(self):
         img = np.zeros((self.size, self.size,1), dtype = np.uint8)
         paint_phase = 0
@@ -46,7 +46,7 @@ def paint_quare(self, image, point, width, color):
     
     Para poder dibujar un objeto de clase Rectangle en una imagen, se hace uso de su método *apply()*, al cual se le pasa como argumentos la imagen donde se quiere dibujar y el punto de la imagen donde comienza el rectángulo. Con esto, con simplemente trabajar con las medidas del rectángulo y el punto inicial, podemos establecer los píxeles de la imagen donde se va a tener que pintar del color del rectángulo.
 
-```python3
+```python
     class Rectangle:
         def __init__(self, width, height, rgb, offset = 0):
             self.width = width
@@ -73,7 +73,7 @@ Para ello lo primero es multiplicar los pixeles de la imagen por 3 matrices [1, 
 
 A la primera imagen le aplicamos un filtro negativo restando por 1 toda la imagen entera. A la segunda la multiplicamos por 2 para aumentar el brillo pero asegurandonos que no haya ningún pixel que pase de 255 usango la función np.clip. Por último al tercero le bajamos el brillo dividiendo todos sus pixeles entre 2.
 
-```
+```python
     # SEPARO LOS CANALES MULTIPLICANDO POR EL ARRAY [1, 0, 0] PARA QUE MANTENGA EL FORMATO BGR
     # LO CONVERTIMOS EN NEGATIVO RESTANDO 1
     r = 1 - (frame[:, :] *  [1, 0, 0])
@@ -92,7 +92,7 @@ A la primera imagen le aplicamos un filtro negativo restando por 1 toda la image
 
 Por ultimo creamos un stack con las tres imagenes formadas y lo mostramos
 
-```
+```python
     final = np.hstack((r, g, b))
     final = final.astype(np.uint8)
 
@@ -109,7 +109,7 @@ Comencemos por la primera tarea. Para conocer el pixel mas claro y el mas oscuro
 
 El primer método es sencillo recorre toda la matriz guardando en dos variables el punto con máximo brillo y el brillo en ese punto. Si algún pixel supera ese brillo se actualiza el brillo máximo y el punto. Así hasta que termina el recorrido. Lo mismo para la función del pixel mas oscuro pero al revés por lo tanto no considero que haya que explicarlo. Este método daba mucho lag debido al tiempo que tarda en recorrer toda la matriz por iteración
 
-```
+```python
 def find_brightest_pixel(image):
     # Initialize variables to keep track of the brightest pixel and its brightness
     brightest_pixel = None
@@ -133,13 +133,13 @@ El segundo método usa numpy y es bastante más compacto. Para esto primero se u
 
 Después buscamos con argmax el indice del máximo de los valores de esta matriz este método duelve el indice como si fuera un array de 1d por lo tanto tendremos que usar unravel_index para convertirlo en un punto de dos dimensiones sobre nuestra imagen.
 
-```
+```python
     pmas_claro = np.unravel_index(np.argmax(np.average(image, axis=2)), image.shape[:2])
 ```
 
 Por último pintamos este punto y ya estaría. Para la versión oscura basta con sustituir argmax por argmin por lo tanto veo innecesario exlicarlo.
 
-```
+```python
     cv2.circle(image, (pmas_claro[1], pmas_claro[0]), 20, (255, 0, 0), -1)
     cv2.circle(image, (pmas_oscuro[1], pmas_oscuro[0]), 20, (0, 0, 255), -1)
 ```
@@ -148,7 +148,7 @@ La segunda tarea sería buscar la región de 8x8 con mayor brillo y menor brillo
 
 La primera forma hace exactamente lo mismo que en la de un pixel lo que va calculando el brillo por región envez de puntualmente y apuntando el pixel de arriba a la izquierda de la región procesada. A su vez al recorrer el bucle hay que restar 7 a las dimensiones de la imagen para no pasarnos de indice. De nuevo este método es muy lento y producía cierto lag.
 
-```
+```python
 def find_darkest_8x8_region(image):
     # Initialize variables to keep track of the darkest region and its brightness
     darkest_region = None
@@ -174,7 +174,7 @@ def find_darkest_8x8_region(image):
 Respecto el método con numpy es muy parecido al anterior. Primero hacemos un average para sacar el brillo por pixel. Después aplicamos una convolución con una matriz de todo 1nos de 8x8 de esta forma en cada pixel tendremos el brillo de cada región de 8x8 y por ultimo usamos argmax y unravel index al igual que antes para quedarnos el punto de esa región de 8x8.
 
 
-```
+```python
     means_matrix = np.average(image, axis=2)
 
     convolve = cv2.filter2D(means_matrix, -1, np.ones((8, 8)))
