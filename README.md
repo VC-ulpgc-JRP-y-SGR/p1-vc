@@ -68,11 +68,11 @@ SARA
 # TAREA 4
 ## Modifica de alguna forma los valores de un plano de la imagen
 
-Para esta tarea lo que hemos echo es separar los canales rgb de la imagen pero manteniendo el formato rgb es decir una tupla con 3 valores (Aunque cabe destacar que en openCV no se utiliza el rgb sino el bgr)
+Para esta tarea, hemos realizado la separación de los canales RGB de una imagen, manteniendo el formato RGB, aunque es importante mencionar que en OpenCV se utiliza el formato BGR.
 
-Para ello lo primero es multiplicar los pixeles de la imagen por 3 matrices [1, 0, 0], [0, 1, 0], [0, 0, 1] de esta forma nos iremos quedando con cada uno de los canales
+Primero, multiplicamos los píxeles de la imagen por tres matrices: [1, 0, 0], [0, 1, 0], [0, 0, 1]. De esta manera, obtenemos cada uno de los canales por separado.
 
-A la primera imagen le aplicamos un filtro negativo restando por 1 toda la imagen entera. A la segunda la multiplicamos por 2 para aumentar el brillo pero asegurandonos que no haya ningún pixel que pase de 255 usango la función np.clip. Por último al tercero le bajamos el brillo dividiendo todos sus pixeles entre 2.
+Para la primera imagen, aplicamos un filtro negativo restando 1 a todos los píxeles de la imagen. En el segundo canal, multiplicamos por 2 para aumentar el brillo, asegurándonos de que ningún píxel supere el valor de 255 utilizando la función np.clip. Por último, en el tercer canal, reducimos el brillo dividiendo todos sus píxeles entre 2.
 
 ```python
     # SEPARO LOS CANALES MULTIPLICANDO POR EL ARRAY [1, 0, 0] PARA QUE MANTENGA EL FORMATO BGR
@@ -91,7 +91,7 @@ A la primera imagen le aplicamos un filtro negativo restando por 1 toda la image
     b = (frame[:, :] * [0, 0, 1])/2
 ```
 
-Por ultimo creamos un stack con las tres imagenes formadas y lo mostramos
+Por ultimo creamos un stack con las tres imagenes formadas y las mostramos.
 
 ```python
     final = np.hstack((r, g, b))
@@ -106,9 +106,9 @@ Por ultimo creamos un stack con las tres imagenes formadas y lo mostramos
 # TAREA 5
 ### Pintar círculos en las posiciones del píxel más claro y oscuro de la imagen  ¿Si quisieras hacerlo sobre la zona 8x8 más clara/oscura?
 
-Comencemos por la primera tarea. Para conocer el pixel mas claro y el mas oscuro hemos probado dos métodos: primero recorriendo la imagen matriz con dos bucles for y segundo usando funciones de numpy para poder averiguar el pixel.
+Para abordar la tarea de encontrar el píxel más claro y el más oscuro en una imagen, exploramos dos enfoques diferentes:
 
-El primer método es sencillo recorre toda la matriz guardando en dos variables el punto con máximo brillo y el brillo en ese punto. Si algún pixel supera ese brillo se actualiza el brillo máximo y el punto. Así hasta que termina el recorrido. Lo mismo para la función del pixel mas oscuro pero al revés por lo tanto no considero que haya que explicarlo. Este método daba mucho lag debido al tiempo que tarda en recorrer toda la matriz por iteración
+Método de Bucles For: En este enfoque, recorrimos la matriz de la imagen utilizando dos bucles for. Durante este recorrido, mantuvimos un registro de la ubicación del píxel con el brillo máximo y su valor de brillo correspondiente. Si encontramos un píxel con un brillo superior, actualizamos los valores del píxel más brillante. Aplicamos un enfoque similar para encontrar el píxel más oscuro. Sin embargo, este método puede resultar menos eficiente debido al tiempo que lleva recorrer toda la matriz en cada iteración.
 
 ```python
 def find_brightest_pixel(image):
@@ -130,9 +130,9 @@ def find_brightest_pixel(image):
     return brightest_pixel, max_brightness
 ```
 
-El segundo método usa numpy y es bastante más compacto. Para esto primero se usa la función aveerage en el axis2 de esta forma convertimos todos los pixeles rgb a un escalar que es el promedio de los 3 valores.
+El segundo método se basa en el uso de NumPy y es considerablemente más conciso. Para ello, primero aplicamos la función average en el eje 2, lo que nos permite convertir todos los píxeles RGB en un valor escalar que representa el promedio de los tres componentes de color.
 
-Después buscamos con argmax el indice del máximo de los valores de esta matriz este método duelve el indice como si fuera un array de 1d por lo tanto tendremos que usar unravel_index para convertirlo en un punto de dos dimensiones sobre nuestra imagen.
+Luego, utilizamos la función argmax para encontrar el índice del valor máximo en esta matriz. Es importante destacar que esta función devuelve el índice como si fuera un array de una dimensión. Por lo tanto, empleamos la función unravel_index para convertir este índice en un punto de dos dimensiones que corresponde a la ubicación del píxel en nuestra imagen.
 
 ```python
     pmas_claro = np.unravel_index(np.argmax(np.average(image, axis=2)), image.shape[:2])
@@ -142,12 +142,12 @@ Por último pintamos este punto y ya estaría. Para la versión oscura basta con
 
 ```python
     cv2.circle(image, (pmas_claro[1], pmas_claro[0]), 20, (255, 0, 0), -1)
-    cv2.circle(image, (pmas_oscuro[1], pmas_oscuro[0]), 20, (0, 0, 255), -1)
 ```
 
-La segunda tarea sería buscar la región de 8x8 con mayor brillo y menor brillo. Para esto hemos igual que antes desarrollado dos formas, una lenta recorriendo con dos bucles toda la matriz y otra rápida usando numpy y una de las propiedades de la operación de convolución.
+Comencemos con la tarea de calcular la región 8x8 mas brillante o mas oscuro.
 
-La primera forma hace exactamente lo mismo que en la de un pixel lo que va calculando el brillo por región envez de puntualmente y apuntando el pixel de arriba a la izquierda de la región procesada. A su vez al recorrer el bucle hay que restar 7 a las dimensiones de la imagen para no pasarnos de indice. De nuevo este método es muy lento y producía cierto lag.
+En el primer enfoque, realizamos una tarea similar a la de encontrar el píxel más brillante y oscuro, pero en lugar de trabajar con píxeles individuales, calculamos el brillo por regiones de 8x8 píxeles en toda la imagen. Comenzamos desde la esquina superior izquierda de la imagen y avanzamos a través de bucles para procesar cada región. Durante este proceso, mantenemos un seguimiento de la región con el brillo más alto y el brillo más bajo. Sin embargo, debido a las dimensiones de la imagen, debemos restar 7 a cada dimensión para evitar desbordar los índices. Este método, aunque cumple su objetivo, tiende a ser lento y puede causar cierto retraso.
+
 
 ```python
 def find_darkest_8x8_region(image):
@@ -172,7 +172,9 @@ def find_darkest_8x8_region(image):
     return darkest_region, min_region_brightness
 ```
 
-Respecto el método con numpy es muy parecido al anterior. Primero hacemos un average para sacar el brillo por pixel. Después aplicamos una convolución con una matriz de todo 1nos de 8x8 de esta forma en cada pixel tendremos el brillo de cada región de 8x8 y por ultimo usamos argmax y unravel index al igual que antes para quedarnos el punto de esa región de 8x8.
+En el segundo método, empleamos NumPy para lograr un enfoque más eficiente. Primero, calculamos el brillo promedio por píxel en la imagen utilizando la función average. Luego, aplicamos una operación de convolución utilizando una matriz de 8x8 compuesta por unos. Esta convolución nos proporciona, en cada píxel, el brillo promedio de la región circundante de 8x8 píxeles.
+
+A continuación, utilizamos argmax y unravel_index, como mencionamos anteriormente, para determinar la ubicación de la región de 8x8 con el brillo máximo y mínimo en la imagen.
 
 
 ```python
